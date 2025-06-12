@@ -1,5 +1,5 @@
-use std::borrow::Cow;
 use snowball::Among;
+use std::borrow::Cow;
 
 #[derive(Debug, Clone)]
 pub struct SnowballEnv<'a> {
@@ -11,12 +11,23 @@ pub struct SnowballEnv<'a> {
     pub ket: usize,
 }
 
-
 impl<'a> SnowballEnv<'a> {
     pub fn create(value: &'a str) -> Self {
         let len = value.len();
         SnowballEnv {
             current: Cow::from(value),
+            cursor: 0,
+            limit: len,
+            limit_backward: 0,
+            bra: 0,
+            ket: len,
+        }
+    }
+
+    pub fn create_cow(value: Cow<'a, str>) -> Self {
+        let len = value.len();
+        SnowballEnv {
+            current: value,
             cursor: 0,
             limit: len,
             limit_backward: 0,
@@ -75,8 +86,9 @@ impl<'a> SnowballEnv<'a> {
         if (self.cursor as i32 - self.limit_backward as i32) < s.len() as i32 {
             false
             // Check if cursor -s.len is a char boundry. if not well... return false obv
-        } else if !self.current.is_char_boundary(self.cursor - s.len()) ||
-                  !self.current[self.cursor - s.len()..].starts_with(s) {
+        } else if !self.current.is_char_boundary(self.cursor - s.len())
+            || !self.current[self.cursor - s.len()..].starts_with(s)
+        {
             false
         } else {
             self.cursor -= s.len();
@@ -226,9 +238,7 @@ impl<'a> SnowballEnv<'a> {
             }
         }
         return false;
-
     }
-
 
     /// Helper function that removes the string slice between `bra` and `ket`
     pub fn slice_del(&mut self) -> bool {
