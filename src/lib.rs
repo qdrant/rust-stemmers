@@ -11,9 +11,9 @@
 //! ```
 //!
 //! ```rust
-//! extern crate rust_stemmers;
+//! extern crate qdrant_rust_stemmers;
 //!
-//! use rust_stemmers::{Algorithm, Stemmer};
+//! use qdrant_rust_stemmers::{Algorithm, Stemmer};
 //!
 //! fn main() {
 //!    let en_stemmer = Stemmer::create(Algorithm::English);
