@@ -371,6 +371,13 @@ mod tests {
     }
 
     #[test]
+    fn greek_stale_slice_test() {
+        // Used to panic with `byte index 16 is out of bounds`, see qdrant/qdrant#11386
+        stemms_to("αντίθετε", "αντιθετ", Algorithm::Greek);
+        stemms_to("ΑΝΤΙΘΕΤΕ", "αντιθετ", Algorithm::Greek);
+    }
+
+    #[test]
     fn norwegian_test() {
         use std::fs;
         use std::io;

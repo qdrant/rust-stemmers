@@ -96,8 +96,23 @@ impl<'a> SnowballEnv<'a> {
         }
     }
 
+    /// Check that `bra..ket` is a valid range of `current`.
+    fn valid_range(&self, bra: usize, ket: usize) -> bool {
+        bra <= ket && self.current.is_char_boundary(bra) && self.current.is_char_boundary(ket)
+    }
+
+    /// Check that the slice `bra..ket` is valid, like `slice_check` in the C runtime.
+    /// Generated code can leave a stale `ket` behind (e.g. greek step5c), which would
+    /// otherwise panic on slicing. An invalid slice makes the operation fail instead.
+    fn slice_check(&self) -> bool {
+        self.valid_range(self.bra, self.ket)
+    }
+
     /// Replace string between `bra` and `ket` with s
     pub fn slice_from(&mut self, s: &str) -> bool {
+        if !self.slice_check() {
+            return false;
+        }
         let (bra, ket) = (self.bra, self.ket);
         self.replace_s(bra, ket, s);
         true
@@ -246,6 +261,9 @@ impl<'a> SnowballEnv<'a> {
     }
 
     pub fn insert(&mut self, bra: usize, ket: usize, s: &str) {
+        if !self.valid_range(bra, ket) {
+            return;
+        }
         let adjustment = self.replace_s(bra, ket, s);
         if bra <= self.bra {
             self.bra = (self.bra as i32 + adjustment) as usize;
@@ -255,7 +273,12 @@ impl<'a> SnowballEnv<'a> {
         }
     }
 
+    /// Returns the slice `bra..ket`, or an empty string if the slice is invalid.
+    /// Generated code treats an empty result as failure.
     pub fn slice_to(&mut self) -> String {
+        if !self.slice_check() {
+            return String::new();
+        }
         self.current[self.bra..self.ket].to_string()
     }
 
