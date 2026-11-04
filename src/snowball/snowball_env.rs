@@ -102,8 +102,7 @@ impl<'a> SnowballEnv<'a> {
     }
 
     /// Check that the slice `bra..ket` is valid, like `slice_check` in the C runtime.
-    /// Generated code can leave a stale `ket` behind (e.g. greek step5c), which would
-    /// otherwise panic on slicing. An invalid slice makes the operation fail instead.
+    /// An invalid slice makes the operation fail instead of panicking.
     fn slice_check(&self) -> bool {
         self.valid_range(self.bra, self.ket)
     }
@@ -115,6 +114,8 @@ impl<'a> SnowballEnv<'a> {
         }
         let (bra, ket) = (self.bra, self.ket);
         self.replace_s(bra, ket, s);
+        // Keep the slice pointing at the replacement, as the upstream C and Rust runtimes do
+        self.ket = bra + s.len();
         true
     }
 
