@@ -388,6 +388,13 @@ mod tests {
     }
 
     #[test]
+    fn greek_isa_test() {
+        // Used to stem to the empty string, see snowballstem/snowball@9daa46d8ec
+        stemms_to("ίσα", "ισ", Algorithm::Greek);
+        stemms_to("ισαισα", "ισα", Algorithm::Greek);
+    }
+
+    #[test]
     fn norwegian_test() {
         use std::fs;
         use std::io;
