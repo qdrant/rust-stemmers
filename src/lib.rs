@@ -378,6 +378,16 @@ mod tests {
     }
 
     #[test]
+    fn greek_or_tail_test() {
+        // `A or [substring] atlimit among (...)` in steps 4, 5b and 5c also ran the among after `A`
+        // succeeded and mangled the stem. Upstream snowball has the same bug, so these follow the
+        // rule's intent (stem + suffix stem) rather than upstream output.
+        stemms_to("αλαικα", "αλαικ", Algorithm::Greek);
+        stemms_to("πιάνε", "πιαν", Algorithm::Greek);
+        stemms_to("διετε", "διετ", Algorithm::Greek);
+    }
+
+    #[test]
     fn norwegian_test() {
         use std::fs;
         use std::io;

@@ -2485,7 +2485,11 @@ fn r_step4(env: &mut SnowballEnv, context: &mut Context) -> bool {
             let (bra, ket) = (env.cursor, env.cursor);
             env.insert(bra, ket, &context.S_s);
             env.cursor = c;
-            break 'lab0;
+            // Hand-fixed: `or` binds tighter than concatenation, so `A or [substring] atlimit
+            // among (...)` was generated as `(A or [) substring ] atlimit among (...)` and the
+            // tail also ran after this alternative, on a slice that no longer matches the word
+            // (e.g. αλαικα -> αλαιικκ). The intended rule is `A or ([substring] atlimit among (...))`.
+            return true;
         }
         env.cursor = env.limit - v_1;
         // [, line 414
@@ -2698,7 +2702,8 @@ fn r_step5b(env: &mut SnowballEnv, context: &mut Context) -> bool {
             let (bra, ket) = (env.cursor, env.cursor);
             env.insert(bra, ket, &context.S_s);
             env.cursor = c;
-            break 'lab1;
+            // Hand-fixed, see step4
+            return true;
         }
         env.cursor = env.limit - v_2;
         // [, line 456
@@ -2797,7 +2802,8 @@ fn r_step5c(env: &mut SnowballEnv, context: &mut Context) -> bool {
             let (bra, ket) = (env.cursor, env.cursor);
             env.insert(bra, ket, &context.S_s);
             env.cursor = c;
-            break 'lab1;
+            // Hand-fixed, see step4
+            return true;
         }
         env.cursor = env.limit - v_2;
         'lab3: loop {
@@ -2825,7 +2831,8 @@ fn r_step5c(env: &mut SnowballEnv, context: &mut Context) -> bool {
             let (bra, ket) = (env.cursor, env.cursor);
             env.insert(bra, ket, &context.S_s);
             env.cursor = c;
-            break 'lab1;
+            // Hand-fixed, see step4
+            return true;
         }
         env.cursor = env.limit - v_2;
         // [, line 493
