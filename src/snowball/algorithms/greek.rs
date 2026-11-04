@@ -2529,10 +2529,15 @@ fn r_step5a(env: &mut SnowballEnv, context: &mut Context) -> bool {
     let v_1 = env.limit - env.cursor;
     'lab0: loop {
         // (, line 424
+        // Hand-ported from upstream greek.sbl (snowballstem/snowball@1411289b2b): set the slice
+        // to `αγαμε` before replacing it, otherwise `<-` replaces whatever slice an earlier
+        // step left behind (e.g. αγαμεισεσ -> αγαμεαγαμ).
+        env.ket = env.cursor;
         // literal, line 424
         if !env.eq_s_b(&"\u{03B1}\u{03B3}\u{03B1}\u{03BC}\u{03B5}") {
             break 'lab0;
         }
+        env.bra = env.cursor;
         // atlimit, line 424
         if env.cursor > env.limit_backward {
             break 'lab0;

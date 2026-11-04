@@ -395,6 +395,13 @@ mod tests {
     }
 
     #[test]
+    fn greek_agame_test() {
+        // Used to replace a slice left over from an earlier step, see snowballstem/snowball@1411289b2b
+        stemms_to("αγαμεισεσ", "αγαμ", Algorithm::Greek);
+        stemms_to("αγαμε", "αγαμ", Algorithm::Greek);
+    }
+
+    #[test]
     fn norwegian_test() {
         use std::fs;
         use std::io;
