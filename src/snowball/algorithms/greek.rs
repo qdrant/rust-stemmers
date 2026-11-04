@@ -1553,6 +1553,22 @@ fn r_steps2(env: &mut SnowballEnv, context: &mut Context) -> bool {
 
 fn r_steps3(env: &mut SnowballEnv, context: &mut Context) -> bool {
     // (, line 216
+    // Hand-ported from upstream greek.sbl (snowballstem/snowball@9daa46d8ec): check for the
+    // whole word `ισα` before the among below deletes it. The check used to run after the
+    // delete, so `ισα` stemmed to the empty string and `ισαισα` sliced past the end.
+    let v_0 = env.limit - env.cursor;
+    'lab_isa: loop {
+        env.ket = env.cursor;
+        if !env.eq_s_b(&"\u{03B9}\u{03C3}\u{03B1}") {
+            break 'lab_isa;
+        }
+        env.bra = env.cursor;
+        if env.cursor > env.limit_backward {
+            break 'lab_isa;
+        }
+        return env.slice_from("\u{03B9}\u{03C3}");
+    }
+    env.cursor = env.limit - v_0;
     // [, line 217
     env.ket = env.cursor;
     // substring, line 217
@@ -1571,23 +1587,6 @@ fn r_steps3(env: &mut SnowballEnv, context: &mut Context) -> bool {
     // or, line 221
     'lab0: loop {
         let v_1 = env.limit - env.cursor;
-        'lab1: loop {
-            // (, line 221
-            // literal, line 221
-            if !env.eq_s_b(&"\u{03B9}\u{03C3}\u{03B1}") {
-                break 'lab1;
-            }
-            // atlimit, line 221
-            if env.cursor > env.limit_backward {
-                break 'lab1;
-            }
-            // <-, line 221
-            if !env.slice_from("\u{03B9}\u{03C3}") {
-                return false;
-            }
-            break 'lab0;
-        }
-        env.cursor = env.limit - v_1;
         'lab2: loop {
             // (, line 222
             // [, line 222
@@ -2485,7 +2484,11 @@ fn r_step4(env: &mut SnowballEnv, context: &mut Context) -> bool {
             let (bra, ket) = (env.cursor, env.cursor);
             env.insert(bra, ket, &context.S_s);
             env.cursor = c;
-            break 'lab0;
+            // Hand-fixed: `or` binds tighter than concatenation, so `A or [substring] atlimit
+            // among (...)` was generated as `(A or [) substring ] atlimit among (...)` and the
+            // tail also ran after this alternative, on a slice that no longer matches the word
+            // (e.g. αλαικα -> αλαιικκ). The intended rule is `A or ([substring] atlimit among (...))`.
+            return true;
         }
         env.cursor = env.limit - v_1;
         // [, line 414
@@ -2526,10 +2529,15 @@ fn r_step5a(env: &mut SnowballEnv, context: &mut Context) -> bool {
     let v_1 = env.limit - env.cursor;
     'lab0: loop {
         // (, line 424
+        // Hand-ported from upstream greek.sbl (snowballstem/snowball@1411289b2b): set the slice
+        // to `αγαμε` before replacing it, otherwise `<-` replaces whatever slice an earlier
+        // step left behind (e.g. αγαμεισεσ -> αγαμεαγαμ).
+        env.ket = env.cursor;
         // literal, line 424
         if !env.eq_s_b(&"\u{03B1}\u{03B3}\u{03B1}\u{03BC}\u{03B5}") {
             break 'lab0;
         }
+        env.bra = env.cursor;
         // atlimit, line 424
         if env.cursor > env.limit_backward {
             break 'lab0;
@@ -2698,7 +2706,8 @@ fn r_step5b(env: &mut SnowballEnv, context: &mut Context) -> bool {
             let (bra, ket) = (env.cursor, env.cursor);
             env.insert(bra, ket, &context.S_s);
             env.cursor = c;
-            break 'lab1;
+            // Hand-fixed, see step4
+            return true;
         }
         env.cursor = env.limit - v_2;
         // [, line 456
@@ -2797,7 +2806,8 @@ fn r_step5c(env: &mut SnowballEnv, context: &mut Context) -> bool {
             let (bra, ket) = (env.cursor, env.cursor);
             env.insert(bra, ket, &context.S_s);
             env.cursor = c;
-            break 'lab1;
+            // Hand-fixed, see step4
+            return true;
         }
         env.cursor = env.limit - v_2;
         'lab3: loop {
@@ -2825,7 +2835,8 @@ fn r_step5c(env: &mut SnowballEnv, context: &mut Context) -> bool {
             let (bra, ket) = (env.cursor, env.cursor);
             env.insert(bra, ket, &context.S_s);
             env.cursor = c;
-            break 'lab1;
+            // Hand-fixed, see step4
+            return true;
         }
         env.cursor = env.limit - v_2;
         // [, line 493

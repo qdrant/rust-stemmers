@@ -1,6 +1,6 @@
 [package]
 name = "qdrant-rust-stemmers"
-version = "1.2.3"
+version = "1.3.0"
 authors = ["Jakob Demler <jdemler@curry-software.com>", "CurrySoftware <info@curry-software.com>", "Qdrant Team <team@qdrant.com>"]
 description = "A rust implementation of some popular snowball stemming algorithms"
 repository = "https://github.com/qdrant/rust-stemmers"
